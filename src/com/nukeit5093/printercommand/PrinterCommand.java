@@ -4,6 +4,7 @@ import com.earth2me.essentials.Essentials;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -34,6 +35,20 @@ public class PrinterCommand extends JavaPlugin{
         playerMap = new HashMap<>();
         getCommand("printer").setExecutor(new CommandListener());
         Bukkit.getPluginManager().registerEvents(new PrinterMode(), this);
+    }
+
+    @Override
+    public void onDisable(){
+        for(Player p : Bukkit.getOnlinePlayers()){
+            if(isPlayerInMap(p)){
+                if(getPlayerStatus(p)){
+                    p.sendMessage(getChatPrefix() + ChatColor.RED + "You were removed from printer mode because of a reload.");
+
+                    p.setGameMode(GameMode.SURVIVAL);
+
+                }
+            }
+        }
     }
 
     private boolean setupEconomy() {

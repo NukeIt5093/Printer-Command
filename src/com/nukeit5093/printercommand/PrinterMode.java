@@ -10,7 +10,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.math.BigDecimal;
@@ -39,7 +41,7 @@ public class PrinterMode implements Listener{
         if(PrinterCommand.isPlayerInMap(player)) {
             if (PrinterCommand.getPlayerStatus(player)) {
                 e.setCancelled(true);
-                player.sendMessage(PrinterCommand.getChatPrefix() + ChatColor.RED + "You cannot break blocks while in printer mode.");
+                player.sendMessage(PrinterCommand.getChatPrefix() + ChatColor.RED + "You cannot break blocks in printer mode!");
             }
         }
     }
@@ -52,19 +54,44 @@ public class PrinterMode implements Listener{
 
         if(PrinterCommand.isPlayerInMap(player)) {
             if (PrinterCommand.getPlayerStatus(player)) {
-                double r = economy.getBalance(player);
-                double itemWorth = essentials.getWorth().getPrice(itemStack).doubleValue();
-                if(itemWorth > r){
-                    player.sendMessage(PrinterCommand.getChatPrefix() + ChatColor.RED + "You do not have enough money to place " + block.getType().toString());
-                    e.setCancelled(true);
-                }else{
-                    economy.withdrawPlayer(player, itemWorth);
-                    player.sendMessage(PrinterCommand.getChatPrefix() + ChatColor.GREEN + "Bought " + block.getType().toString() + " for $" + ChatColor.WHITE + itemWorth + ChatColor.GREEN + ". Your new balance is: $" + ChatColor.WHITE + economy.getBalance(player));
-                }
+                try{
+                    double r = economy.getBalance(player);
+                    double itemWorth = essentials.getWorth().getPrice(itemStack).doubleValue();
+                    if(itemWorth > r){
+                        player.sendMessage(PrinterCommand.getChatPrefix() + ChatColor.RED + "You do not have enough money to place " + block.getType().toString().toLowerCase() + "!");
+                        e.setCancelled(true);
+                    }else{
+                        economy.withdrawPlayer(player, itemWorth);
+                        player.sendMessage(PrinterCommand.getChatPrefix() + ChatColor.GREEN + "Bought " + block.getType().toString().toLowerCase() + " for $" + ChatColor.WHITE + itemWorth + ChatColor.GREEN + ". Your new balance is: $" + ChatColor.WHITE + economy.getBalance(player));
+                    }
+                }catch(NullPointerException exc){
 
+                }
             }
         }
+    }
 
+    @EventHandler
+    public void onItemThrow(PlayerDropItemEvent e){
+        Player player = e.getPlayer();
+        if(PrinterCommand.isPlayerInMap(player)) {
+            if (PrinterCommand.getPlayerStatus(player)) {
+                e.setCancelled(true);
+                player.sendMessage(PrinterCommand.getChatPrefix() + ChatColor.RED + "You cannot drop items in printer mode!");
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInventoryOpen(InventoryOpenEvent e){
+        Player player = (Player) e.getPlayer();
+        if(PrinterCommand.isPlayerInMap(player)) {
+            if (PrinterCommand.getPlayerStatus(player)) {
+                e.setCancelled(true);
+                player.closeInventory();
+                player.sendMessage(PrinterCommand.getChatPrefix() + ChatColor.RED + "You cannot open inventores in printer mode!");
+            }
+        }
     }
 
 }
