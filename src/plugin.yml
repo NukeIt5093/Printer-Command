@@ -1,0 +1,3 @@
+name: PrinterCommand
+version: 1.0
+main: com.nukeit5093.printercommand.PrinterCommand
